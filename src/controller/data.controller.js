@@ -11,7 +11,11 @@ export const uploadCSV = catchAsync(async (req, res) => {
 
   const csvData = [];
   const stream = Readable.from(req.file.buffer.toString());
+  const existingDataCount = await DataModel.countDocuments();
 
+  if (existingDataCount > 0) {
+    await DataModel.deleteMany({});
+  }
   stream
     .pipe(csvParser())
     .on("data", (row) => {
@@ -26,7 +30,7 @@ export const uploadCSV = catchAsync(async (req, res) => {
         return;
       }
       try {
-        await DataModel.insertMany(csvData);
+        await DataModel.create(csvData);
         res.status(200).json({ message: "Data upload successful" });
       } catch (err) {
         const errorDetails = {
@@ -46,7 +50,7 @@ export const uploadCSV = catchAsync(async (req, res) => {
 
 export const fetchData = catchAsync(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const perPage = parseInt(req.query.perPage) || 8;
+  const perPage = parseInt(req.query.perPage) || 10;
   const totalCount = await DataModel.countDocuments();
   const totalPages = Math.ceil(totalCount / perPage);
   if (page > totalPages || page < 1) {
