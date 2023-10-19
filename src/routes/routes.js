@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { uploadCSV } from "../controller/data.controller.js";
+import { fetchData, uploadCSV } from "../controller/data.controller.js";
 import multer from "multer";
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -11,6 +11,7 @@ const upload = multer({
 const routes = Router();
 
 routes.post("/upload", upload.single("csvFile"), uploadCSV);
+routes.get('/user',fetchData)
 routes.get("/test", (req, res) => {
   res.send("Success");
 });

@@ -43,3 +43,24 @@ export const uploadCSV = catchAsync(async (req, res) => {
     });
   });
 });
+
+export const fetchData = catchAsync(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const perPage = parseInt(req.query.perPage) || 10;
+  const totalCount = await Data.countDocuments();
+  const totalPages = Math.ceil(totalCount / perPage);
+  if (page > totalPages || page < 1) {
+    return res.status(400).json({ error: "Invalid page number" });
+  }
+  const data = await Data.find()
+    .skip((page - 1) * perPage)
+    .limit(perPage);
+
+  res.status(200).json({
+    page,
+    perPage,
+    totalPages,
+    totalCount,
+    data,
+  });
+});
